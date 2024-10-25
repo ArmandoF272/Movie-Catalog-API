@@ -1,4 +1,11 @@
 class MoviesController < ApplicationController
+
+  def index
+    movies = Movie.all
+    movies = filter_movies(movies, params)
+    render json: movies.map { |movie| movie_json(movie) }
+  end
+
   private
     def movie_json(movie)
       {
