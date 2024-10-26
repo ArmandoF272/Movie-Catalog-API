@@ -1,9 +1,21 @@
 class MoviesController < ApplicationController
+  require 'csv'
 
   def index
     movies = Movie.all
     movies = filter_movies(movies, params)
     render json: movies.map { |movie| movie_json(movie) }
+  end
+
+  def import
+    file_path = params.values.find { |value| value.is_a?(ActionDispatch::Http::UploadedFile) }&.tempfile&.path
+
+    if file_path.present?
+      result = Movie.import_from_csv(file_path)
+      render json: result.except(:code), status: result[:code]
+    else
+      render json: { error: 'No file provided' }, status: :bad_request
+    end
   end
 
   private
